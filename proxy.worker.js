@@ -115,6 +115,9 @@ async function handleHtmlContent(response, protocol, host, actualUrlStr) {
     new URL(actualUrlStr).origin
   );
 
+  // 在 HTML 内容加载后，添加 target="_blank" 到所有链接
+  modifiedText = addTargetToLinks(modifiedText);
+
   return modifiedText;
 }
 
@@ -122,6 +125,16 @@ async function handleHtmlContent(response, protocol, host, actualUrlStr) {
 function replaceRelativePaths(text, protocol, host, origin) {
   const regex = new RegExp('((href|src|action)=["\'])/(?!/)', 'g');
   return text.replace(regex, `$1${protocol}//${host}/${origin}/`);
+}
+
+// 在 HTML 中的所有链接上添加 target="_blank"
+function addTargetToLinks(htmlContent) {
+  return htmlContent.replace(/<a([^>]+)>/g, (match, p1) => {
+    if (!p1.includes('target="_blank"')) {
+      return `<a${p1} target="_blank">`;
+    }
+    return match;
+  });
 }
 
 // 返回 JSON 格式的响应
@@ -230,11 +243,3 @@ function getRootHtml() {
   <script>
       function redirectToProxy(event) {
           event.preventDefault();
-          const targetUrl = document.getElementById('targetUrl').value.trim();
-          const currentOrigin = window.location.origin;
-          window.open(currentOrigin + '/' + encodeURIComponent(targetUrl), '_blank');
-      }
-  </script>
-</body>
-</html>`;
-}
