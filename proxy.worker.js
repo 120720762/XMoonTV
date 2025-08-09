@@ -107,13 +107,7 @@ function handleRedirect(response, body) {
 // 处理 HTML 内容中的相对路径
 async function handleHtmlContent(response, protocol, host, actualUrlStr) {
   const originalText = await response.text();
-  const regex = new RegExp('((href|src|action)=["\'])/(?!/)', 'g');
-  let modifiedText = replaceRelativePaths(
-    originalText,
-    protocol,
-    host,
-    new URL(actualUrlStr).origin
-  );
+  let modifiedText = originalText;
 
   // 在 HTML 内容加载后，添加 target="_blank" 到所有链接
   modifiedText = addTargetToLinks(modifiedText);
@@ -121,19 +115,14 @@ async function handleHtmlContent(response, protocol, host, actualUrlStr) {
   return modifiedText;
 }
 
-// 替换 HTML 内容中的相对路径
-function replaceRelativePaths(text, protocol, host, origin) {
-  const regex = new RegExp('((href|src|action)=["\'])/(?!/)', 'g');
-  return text.replace(regex, `$1${protocol}//${host}/${origin}/`);
-}
-
 // 在 HTML 中的所有链接上添加 target="_blank"
 function addTargetToLinks(htmlContent) {
   return htmlContent.replace(/<a([^>]+)>/g, (match, p1) => {
+    // 如果原链接中没有 target="_blank"，则添加它
     if (!p1.includes('target="_blank"')) {
       return `<a${p1} target="_blank">`;
     }
-    return match;
+    return match;  // 如果已经有 target="_blank"，保持原样
   });
 }
 
