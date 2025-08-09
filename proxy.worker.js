@@ -243,3 +243,11 @@ function getRootHtml() {
   <script>
       function redirectToProxy(event) {
           event.preventDefault();
+          const targetUrl = document.getElementById('targetUrl').value.trim();
+          const currentOrigin = window.location.origin;
+          window.open(currentOrigin + '/' + encodeURIComponent(targetUrl), '_blank');
+      }
+  </script>
+</body>
+</html>`;
+}
